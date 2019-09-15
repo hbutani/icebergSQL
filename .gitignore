@@ -1,0 +1,52 @@
+*.class
+*.log
+*.pyc
+sbt/*.jar
+*.crc
+
+# sbt specific
+.cache/
+.history/
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# idea
+.idea/
+*.iml
+
+# Mac
+.DS_Store
+
+# emacs
+*.*~
+
+# docs
+docs/private/
+docs/*.html
+docs/*.tex
+docs/auto/
+*-blx.bib
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+docs/*.xml
+docs/*.key
+*.tex
+*.tiff
+docs/benchmark/*.html
+**/auto/
+docs/notes/*_ImplNotes.org
+
+
+derby.log
+
+#test
+src/test/resources/store_sales_out/
+src/test/scala/org/apache/spark/sql/hive/test/iceberg/temp/
+_SUCCESS
