@@ -29,7 +29,7 @@ import org.apache.spark.sql.execution.datasources.PartitionDirectory
 import org.apache.spark.sql.execution.{CodegenSupport, FileSourceScanExec, SparkPlan, UnaryExecNode}
 import org.apache.spark.sql.iceberg.table.SparkTables
 import org.apache.spark.sql.iceberg.utils.DelegationUtils.{DelegatedField, DelegatedMethod0, DelegatedMethod1}
-import org.apache.spark.sql.iceberg.utils.{ColumnDependenciesExprVisitor, ExpressionConversions, Transforms}
+import org.apache.spark.sql.iceberg.utils.{ColumnDependenciesExprVisitor, ExpressionConversions, TableUtils, Transforms}
 import com.netflix.iceberg.transforms.{Transform => IceTransform}
 import org.apache.spark.sql.iceberg.utils.TypeConversions.TypeMapping
 
@@ -74,7 +74,9 @@ case class IceTableScanExec(child: FileSourceScanExec,
   }
 
   @transient private lazy val iceDataFiles : Seq[DataFile] = {
-    val iceScan = iceTable.newScan().filter(icebergFilter)
+    val iceScan = iceTable.newScan().
+      useSnapshot(TableUtils.getThreadSnapShotId(iceTable)).
+      filter(icebergFilter)
     import scala.collection.JavaConversions._
     iceScan.planFiles().map(_.file).toSeq
   }

@@ -34,9 +34,9 @@ abstract class AbstractTest extends fixture.FunSuite
 
   override def beforeAll() = {
     println("*** Starting TestCase " ++ this.toString() )
-    System.setProperty("user.timezone", "UTC")
-    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    DateTimeZone.setDefault(DateTimeZone.forID("UTC"))
+//    System.setProperty("user.timezone", "UTC")
+//    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+//    DateTimeZone.setDefault(DateTimeZone.forID("UTC"))
 
     new SparkSessionExtensions()(TestIcebergHive.sparkSession.extensions)
 

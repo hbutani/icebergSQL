@@ -17,6 +17,8 @@
 
 package org.apache.spark.sql.hive.test.iceberg
 
+import java.util.Date
+
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.iceberg.utils
 import org.apache.spark.sql.iceberg.utils.TableUtils
@@ -110,6 +112,22 @@ class BasicCreateAndInsertTest extends AbstractTest {
 
   }
 
+  def asOf(tStr : String,
+           tblNm : String
+          ) : Unit = {
+
+    val sqlText =
+      s"""
+         |as of '${tStr}'
+         |select count(*) from ${tblNm}
+         |""".stripMargin
+
+    println(sqlText)
+    TestIcebergHive.sql(sqlText).
+      show(10000, false)
+
+  }
+
   test("test1") { td =>
 
     var df: DataFrame = null
@@ -121,6 +139,10 @@ class BasicCreateAndInsertTest extends AbstractTest {
     insert("store_sales_out", "store_sales")
     TestIcebergHive.sql("select count(*) from store_sales_out").
       show(10000, false)
+
+    val timeAtFirstInsert = utils.convertToTimestampString(System.currentTimeMillis())
+    // wait 10 mSecs, so we can demo as Of queries of first insert
+    Thread.sleep(10)
 
     //  a query with predicate ss_sold_date_sk='0906245'
     // has predicate ss_sold_month='09' added
@@ -139,6 +161,8 @@ class BasicCreateAndInsertTest extends AbstractTest {
     TestIcebergHive.sql("select count(*) from store_sales_out").
       show(10000, false)
 
+    asOf(timeAtFirstInsert, "store_sales_out")
+
     println("SnapShot on an insert overwrite: 30 files added, 60 files deleted")
     insertOverwrite("store_sales_out", "store_sales")
     TestIcebergHive.sql("select count(*) from store_sales_out").
@@ -149,12 +173,14 @@ class BasicCreateAndInsertTest extends AbstractTest {
     TestIcebergHive.sql("select count(*) from store_sales_out").
       show(10000, false)
 
+
     println("SnapShot on an insert overwrite of 1 partition, with source predicate:" +
       " 5 files added, 5 files deleted")
     insertOverwrite("store_sales_out", "store_sales",
       "ss_sold_date_sk='0905245'", "ss_item_sk < 5000")
     TestIcebergHive.sql("select count(*) from store_sales_out").
       show(10000, false)
+    asOf(timeAtFirstInsert, "store_sales_out")
 
     // now a query with ss_item_sk > 5000 on ss_sold_date_sk=0905245 should be a null scan
     println("now a query with ss_item_sk > 5000 on ss_sold_date_sk=0905245 should be a null scan")

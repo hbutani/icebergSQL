@@ -27,6 +27,8 @@ import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat
 import org.apache.spark.sql.execution.datasources.{FileFormat => SparkFileFormat}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql._
+import org.apache.spark.sql.catalyst.util.DateTimeUtils
+import org.apache.spark.unsafe.types.UTF8String
 
 import scala.util.Try
 
@@ -107,6 +109,20 @@ trait SessionUtils {
       ss.sparkContext.parallelize(rows, 1),
       schema
     )
+  }
+
+  def convertToEpoch(s : String) : Long = {
+    Try {
+      DateTimeUtils.stringToTimestamp(UTF8String.fromString(s))
+        .map(ts => DateTimeUtils.toMillis(ts))
+        .getOrElse(s.toLong)
+    } getOrElse(
+      throw new AnalysisException(s"Cannot intepret value '${s}' as a timestamp")
+      )
+  }
+
+  def convertToTimestampString(millis : Long) : String = {
+    DateTimeUtils.timestampToString(millis * 1000)
   }
 }
 

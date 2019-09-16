@@ -209,6 +209,20 @@ select count(*) from store_sales_out;
 +--------+
 ```
 
+### Run select as of first insert
+If we query the table as of the first insert we still see `2109` rows
+```sql
+as of '2019-09-15 20:32:24.062'
+select count(*) from store_sales_out
+
++--------+
+|count(1)|
++--------+
+|2109    |
++--------+
+
+```
+
 ### Issue an Insert Overwrite into store_sales_out without any partition specification.
 
 Now let's issue a insert overwrite on the `store_sales_out` table. 
@@ -318,6 +332,20 @@ select count(*) from store_sales_out;
 |count(1)|
 +--------+
 |1877    |
++--------+
+
+```
+
+### Run select as of first insert
+If we can still query the table as of the first insert and we will get `2109` rows
+```sql
+as of '2019-09-15 20:32:24.062'
+select count(*) from store_sales_out
+
++--------+
+|count(1)|
++--------+
+|2109    |
 +--------+
 
 ```

@@ -28,8 +28,6 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.unsafe.types.UTF8String
 
-import scala.util.Try
-
 object TableUtils {
 
   protected[this] def formatName(name: String)(implicit ss : SparkSession) : String = {
@@ -102,6 +100,35 @@ object TableUtils {
       toRow(pId, sShot)
     }
     rows.toSeq
+  }
+
+  private val snapshot_millis = new ThreadLocal[Long] {
+    override def initialValue = -1L
+  }
+
+  def setThreadSnapShotMillis(sMillis : Long) = {
+    snapshot_millis.set(sMillis)
+  }
+
+  def getThreadSnapShotId(iceTable: IceTable) : Long = {
+    val sMillis = snapshot_millis.get
+    setThreadSnapShotMillis(-1L)
+    if (sMillis == -1) {
+      iceTable.currentSnapshot().snapshotId()
+    } else {
+      snapShotId(iceTable, sMillis)
+    }
+  }
+
+  def snapShotId(iceTable : IceTable, timeMs : Long) : Long = {
+    import scala.collection.JavaConversions._
+    var spId = iceTable.currentSnapshot().snapshotId()
+    for (sShot <- iceTable.snapshots()) {
+      if (sShot.timestampMillis() <= timeMs) {
+        spId = sShot.snapshotId()
+      }
+    }
+    spId
   }
 
   def snapShotsDF(iceTable : IceTable)(implicit ss : SparkSession) : DataFrame =

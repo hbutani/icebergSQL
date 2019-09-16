@@ -23,6 +23,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.catalyst.parser.{ParseException, ParserInterface}
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project}
+import org.apache.spark.sql.iceberg.utils
 import org.apache.spark.sql.iceberg.utils.TableUtils
 import org.apache.spark.sql.iceberg.utils.TableUtils.SNAPSHOTSVIEW_SUFFIX
 import org.apache.spark.sql.types.{DataType, StructType}
@@ -85,7 +86,7 @@ class IceParser(val baseParser : ParserInterface) extends AbstractSparkSQLParser
   }
 
   protected override lazy val start: Parser[LogicalPlan] =
-    selectSnapshotViewStar // | selectSnapshotViewProject
+    selectSnapshotViewStar | selectSnapshotViewProject | asOfSelect
 
   private lazy val selectSnapshotViewStar : Parser[LogicalPlan] =
     (SELECT ~ STAR ~ FROM) ~> qualifiedId ^^ {
@@ -102,6 +103,14 @@ class IceParser(val baseParser : ParserInterface) extends AbstractSparkSQLParser
           tblNm.substring(0, tblNm.length - SNAPSHOTSVIEW_SUFFIX.length)
         )(sparkSession)
         Project(qCols.map(UnresolvedAttribute(_)), sRel)
+    }
+
+  private lazy val asOfSelect : Parser[LogicalPlan] =
+    (AS ~ OF) ~> stringLit  ~ restInput ^^ {
+      case asOfTime ~ query => {
+        TableUtils.setThreadSnapShotMillis(utils.convertToEpoch(asOfTime))
+        baseParser.parsePlan(query)
+      }
     }
 
   private lazy val qualifiedCols : Parser[Seq[String]] =
@@ -123,5 +132,7 @@ class IceParser(val baseParser : ParserInterface) extends AbstractSparkSQLParser
   protected val SELECT = Keyword("SELECT")
   protected val STAR = Keyword("*")
   protected val FROM = Keyword("FROM")
+  protected val AS = Keyword("AS")
+  protected val OF = Keyword("OF")
 
 }
