@@ -17,6 +17,7 @@
 
 package org.apache.spark.sql.iceberg.planning
 
+import org.apache.spark.sql.iceberg.parsing.SparkIceParser
 import org.apache.spark.sql.{SparkSessionExtensions => ApacheSparkSessionExtensions}
 
 /**
@@ -33,5 +34,6 @@ class SparkSessionExtensions extends Function1[ApacheSparkSessionExtensions, Uni
     spkExtensions.injectOptimizerRule(CreateIcebergTableRule)
     spkExtensions.injectOptimizerRule(IcebergTableWriteRule)
     spkExtensions.injectPlannerStrategy(IcebergScanStrategy)
+    spkExtensions.injectParser((_, pI) => new SparkIceParser(pI))
   }
 }

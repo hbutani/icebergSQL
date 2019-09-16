@@ -115,12 +115,13 @@ insert/update the `store_sales_out table`. This entire example is in the
  
 Initially the `store_sales_out` has no snapshots as can be seen from the output of the `showSnapShots` invocation
 in _BasicCreateAndInsertTest_. We will be providing a `snapshots_view` shortly, so users will be able to
-issue a `select * from <table_name>$snapshots_view`(this is similar to `snap$` views we have in our SNAP product).
+issue a `select * from <table_name>$snapshots`(this is similar to `snap$` views we have in our SNAP product).
 The table identifier has the form <table_name> followed by the string `$snapshots_view`. So for `store_sales_out` 
 you would have to issue a `select * from store_sales_out$snapshots_view`.
 
 ```
 Initially no snapShots:
+select * from `store_sales_out$snapshots`
 +---+--------+----------+-------------+----------------+--------------------+
 |id |parentId|timeMillis|numAddedFiles|numdDeletedFiles|manifestListLocation|
 +---+--------+----------+-------------+----------------+--------------------+
@@ -136,6 +137,8 @@ insert into  store_sales_out
 
 This creates a SnapShot with 30 files added. The `store_sales` table has `6` partitions with 5 files in each partition.
 ```
+select * from `store_sales_out$snapshots`
+
 +-------------------+--------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |id                 |parentId|timeMillis   |numAddedFiles|numdDeletedFiles|manifestListLocation                                                                                                                                |
 +-------------------+--------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -185,6 +188,8 @@ insert into  store_sales_out
 ```
 This creates another SnapShot with 30 files added.
 ```
+select * from `store_sales_out$snapshots`
+
 +-------------------+------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |id                 |parentId          |timeMillis   |numAddedFiles|numdDeletedFiles|manifestListLocation                                                                                                                                |
 +-------------------+------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -214,6 +219,9 @@ insert overwrite table  store_sales_out
 
 This creates a SnapShot with 30 files added and 60 files deleted.
 ```
+
+select * from `store_sales_out$snapshots`
+
 +-------------------+-------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |id                 |parentId           |timeMillis   |numAddedFiles|numdDeletedFiles|manifestListLocation                                                                                                                                |
 +-------------------+-------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -249,6 +257,9 @@ insert overwrite table  store_sales_out partition ( ss_sold_date_sk='0906245' )
 
 This creates a SnapShot with 5 files added and 5 files deleted.
 ```
+
+select * from `store_sales_out$snapshots`
+
 +-------------------+-------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |id                 |parentId           |timeMillis   |numAddedFiles|numdDeletedFiles|manifestListLocation                                                                                                                                |
 +-------------------+-------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -284,6 +295,9 @@ insert overwrite table  store_sales_out partition ( ss_sold_date_sk='0905245' )
 
 This creates a SnapShot with 5 files added and 5 files deleted. 
 ```
+
+select * from `store_sales_out$snapshots`
+
 +-------------------+-------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |id                 |parentId           |timeMillis   |numAddedFiles|numdDeletedFiles|manifestListLocation                                                                                                                                |
 +-------------------+-------------------+-------------+-------------+----------------+----------------------------------------------------------------------------------------------------------------------------------------------------+

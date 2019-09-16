@@ -18,30 +18,32 @@
 package org.apache.spark.sql.hive.test.iceberg
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.catalyst.expressions.{Cast, Literal}
 import org.apache.spark.sql.iceberg.utils
 import org.apache.spark.sql.iceberg.utils.TableUtils
-import org.apache.spark.sql.types.IntegerType
 
 class BasicCreateAndInsertTest extends AbstractTest {
 
-  def showSnapShots(table : String) : Unit = {
-    val snpShotsDF = TableUtils.snapShotsDF(table)(TestIcebergHive.sparkSession)
-    snpShotsDF.show(1000, false)
+  def showSnapShots(table: String): Unit = {
+    val sqlText = "select * from `" +
+      table + TableUtils.SNAPSHOTSVIEW_SUFFIX +
+      "`"
+    println(sqlText)
+    TestIcebergHive.sql(sqlText).
+      show(10000, false)
   }
 
-  val allColumns : String = " * "
-  val excludeSoldDate : String = "ss_sold_time_sk,ss_item_sk,ss_customer_sk,ss_cdemo_sk," +
+  val allColumns: String = " * "
+  val excludeSoldDate: String = "ss_sold_time_sk,ss_item_sk,ss_customer_sk,ss_cdemo_sk," +
     "ss_hdemo_sk,ss_addr_sk,ss_store_sk,ss_promo_sk,ss_quantity,ss_wholesale_cost," +
     "ss_list_price,ss_sales_price,ss_ext_sales_price,ss_sold_month,ss_sold_day"
 
-  def _insertStatement(insClause : String,
-                        toTable : String,
-                       fromTable : String,
-                       partitionPredicate : String,
-                       sourcePredciate : String,
-                       showSnapShot : Boolean
-                      ) : Unit = {
+  def _insertStatement(insClause: String,
+                       toTable: String,
+                       fromTable: String,
+                       partitionPredicate: String,
+                       sourcePredciate: String,
+                       showSnapShot: Boolean
+                      ): Unit = {
 
     val partSpec = if (partitionPredicate != null) {
       s"partition ( ${partitionPredicate} )"
@@ -54,14 +56,15 @@ class BasicCreateAndInsertTest extends AbstractTest {
       case (p, s) => s"where ${p} and ${s} "
     }
 
-    val selList = if(partitionPredicate != null) {
+    val selList = if (partitionPredicate != null) {
       excludeSoldDate
     } else allColumns
 
-    val insStat = s"""
-                     |${insClause} ${toTable} ${partSpec}
-                     |select ${selList} from ${fromTable}
-                     |${whereClause}
+    val insStat =
+      s"""
+         |${insClause} ${toTable} ${partSpec}
+         |select ${selList} from ${fromTable}
+         |${whereClause}
       """.stripMargin
 
     println(insStat)
@@ -73,12 +76,12 @@ class BasicCreateAndInsertTest extends AbstractTest {
 
   }
 
-  def insert(toTable : String,
-             fromTable : String,
-             partitionPredicate : String = null,
-             sourcePredciate : String = null,
-             showSnapShot : Boolean = true
-            ) : Unit = {
+  def insert(toTable: String,
+             fromTable: String,
+             partitionPredicate: String = null,
+             sourcePredciate: String = null,
+             showSnapShot: Boolean = true
+            ): Unit = {
     _insertStatement(
       "insert into ",
       toTable,
@@ -89,12 +92,12 @@ class BasicCreateAndInsertTest extends AbstractTest {
     )
   }
 
-  def insertOverwrite(toTable : String,
-                      fromTable : String,
-                      partitionPredicate : String = null,
-                      sourcePredciate : String = null,
-                      showSnapShot : Boolean = true
-                     ) : Unit = {
+  def insertOverwrite(toTable: String,
+                      fromTable: String,
+                      partitionPredicate: String = null,
+                      sourcePredciate: String = null,
+                      showSnapShot: Boolean = true
+                     ): Unit = {
 
     _insertStatement(
       "insert overwrite table ",
@@ -107,25 +110,9 @@ class BasicCreateAndInsertTest extends AbstractTest {
 
   }
 
-  ignore("a") { td =>
-
-    TestIcebergHive.sql(
-      "select distinct ss_item_sk from store_sales order by ss_item_sk"
-    ).show(10000, false)
-
-    // item range 16 - 17986
-
-  }
-
-  test("b") { td =>
-
-   val c = Cast(Literal("123"), IntegerType)
-    println(c.eval(null))
-  }
-
   test("test1") { td =>
 
-    var df : DataFrame = null
+    var df: DataFrame = null
 
     println("Initially no snapShots:")
     showSnapShots("store_sales_out")
