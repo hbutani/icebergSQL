@@ -4,7 +4,7 @@ crossScalaVersions := Seq("2.10.5", "2.11.8")
 
 parallelExecution in Test := false
 
-val sparkVersion = "2.4.3"
+val sparkVersion = "2.4.4"
 val icebergVersion = "0.6.3"
 val scalatestVersion = "3.0.5"
 val icebergSQLVersion = "0.0.1-SNAPSHOT"

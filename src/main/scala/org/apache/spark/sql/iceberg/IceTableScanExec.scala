@@ -82,7 +82,7 @@ case class IceTableScanExec(child: FileSourceScanExec,
   }
 
   @transient private val selectedPartitionsDelegate =
-    new DelegatedField[Seq[PartitionDirectory], FileSourceScanExec, FileSourceScanExec](
+    new DelegatedField[Array[PartitionDirectory], FileSourceScanExec, FileSourceScanExec](
       child, "org$apache$spark$sql$execution$FileSourceScanExec$$selectedPartitions")
 
   private val doExecute_d =
