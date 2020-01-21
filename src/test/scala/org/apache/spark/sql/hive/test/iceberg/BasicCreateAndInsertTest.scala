@@ -188,6 +188,17 @@ class BasicCreateAndInsertTest extends AbstractTest {
       "select * from store_sales_out where ss_item_sk > 5000 and ss_sold_date_sk='0905245'")
     assert(utils.filesScanned(df).size == 0)
     df.show(10000, false)
+
+    println("Test for fix Issue 5: DelegatedMethod0 is not serializable")
+    df = TestIcebergHive.sql(
+      """
+        |select *
+        |from store_sales_out a
+        |     join store_sales b on a.ss_item_sk=b.ss_item_sk
+        |where a.ss_item_sk=17908
+        |""".stripMargin
+    )
+    df.show(10000, false)
   }
 
 }

@@ -85,10 +85,10 @@ case class IceTableScanExec(child: FileSourceScanExec,
     new DelegatedField[Array[PartitionDirectory], FileSourceScanExec, FileSourceScanExec](
       child, "org$apache$spark$sql$execution$FileSourceScanExec$$selectedPartitions")
 
-  private val doExecute_d =
+  @transient private val doExecute_d =
     new DelegatedMethod0[SparkPlan, FileSourceScanExec, RDD[InternalRow]](child, "doExecute")
 
-  private val doProduce_d =
+  @transient private val doProduce_d =
     new DelegatedMethod1[CodegenSupport, FileSourceScanExec, String, CodegenContext](
       child, "doProduce")
 
